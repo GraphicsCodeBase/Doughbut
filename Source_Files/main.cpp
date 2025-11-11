@@ -47,69 +47,8 @@ int main()
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
-	// Vertex shader source code
-	const char* vertexShaderSource = R"(
-		#version 330 core
-
-		layout(location = 0) in vec3 position;
-		layout(location = 1) in vec3 normal;
-
-		out VS_OUT {
-			vec3 fragNormal;
-			vec3 fragPos;
-		} vs_out;
-
-		uniform mat4 model;
-		uniform mat4 view;
-		uniform mat4 projection;
-		uniform mat3 normalMatrix;
-
-		void main()
-		{
-			gl_Position = projection * view * model * vec4(position, 1.0);
-			vs_out.fragPos = vec3(model * vec4(position, 1.0));
-			vs_out.fragNormal = normalize(normalMatrix * normal);
-		}
-	)";
-
-	// Fragment shader source code
-	const char* fragmentShaderSource = R"(
-		#version 330 core
-
-		in VS_OUT {
-			vec3 fragNormal;
-			vec3 fragPos;
-		} fs_in;
-
-		out vec4 FragColor;
-
-		uniform vec3 lightPos;
-		uniform vec3 viewPos;
-		uniform vec3 objectColor;
-
-		void main()
-		{
-			float ambientStrength = 0.3;
-			vec3 ambient = ambientStrength * objectColor;
-
-			vec3 norm = normalize(fs_in.fragNormal);
-			vec3 lightDir = normalize(lightPos - fs_in.fragPos);
-			float diff = max(dot(norm, lightDir), 0.0);
-			vec3 diffuse = diff * objectColor;
-
-			float specularStrength = 0.5;
-			vec3 viewDir = normalize(viewPos - fs_in.fragPos);
-			vec3 reflectDir = reflect(-lightDir, norm);
-			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-			vec3 specular = specularStrength * spec * vec3(1.0);
-
-			vec3 result = ambient + diffuse + specular;
-			FragColor = vec4(result, 1.0);
-		}
-	)";
-
-	// Load shaders
-	Shader shader(vertexShaderSource, fragmentShaderSource);
+	// Load shaders from files
+	Shader shader = Shader::FromSource("../../../Shaders/basic.vert", "../../../Shaders/basic.frag");
 
 	// Create a simple triangle for testing
 	std::vector<Vertex> triangleVertices = {
