@@ -139,3 +139,7 @@ Shader Shader::FromSource(const std::string& vertPath, const std::string& fragPa
 	// Create Shader object using your existing constructor
 	return Shader(vertexCode, fragmentCode);
 }
+
+GLuint Shader::getID() {
+	return shaderProgramID;
+}

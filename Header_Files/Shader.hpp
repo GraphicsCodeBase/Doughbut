@@ -10,6 +10,7 @@
 //this is the class i would use to compile my shaders
 class Shader
 {
+public:
 	//default constructor for the shader.
 	Shader() : shaderProgramID(0) {}
 	Shader(const std::string& vertexCode, const std::string& fragmentCode);
@@ -19,7 +20,7 @@ class Shader
 
 	void Use();//bind shader.
 	void UnUse(); //unbind shader.
-	//for compilers 
+	//for compilers
 	// Set uniform variables in the shader program (Overloads)
 	void SetBool(const std::string& uniformName, bool value);
 	void SetInt(const std::string& uniformName, int value);
