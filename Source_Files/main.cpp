@@ -48,7 +48,7 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 
 	// Load shaders from files
-	Shader shader = Shader::FromSource("../../../Shaders/basic.vert", "../../../Shaders/basic.frag");
+	Shader shader = Shader::FromSource("../../../Shaders/main.vert", "../../../Shaders/main.frag");
 
 	// Create a simple triangle for testing
 	std::vector<Vertex> triangleVertices = {
