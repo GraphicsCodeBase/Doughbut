@@ -141,5 +141,5 @@ Shader Shader::FromSource(const std::string& vertPath, const std::string& fragPa
 }
 
 GLuint Shader::getID() {
-	return shaderProgramID;
+	return shaderProgramID;   
 }
