@@ -14,17 +14,19 @@ endif()
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
+find_package(glad REQUIRED)
 
 # Define the executable
 add_executable(doughnut
     Source_Files/main.cpp
-)
+ "Source_Files/Mesh.cpp" "Source_Files/Shader.cpp")
 
 # Link libraries to the executable
 target_link_libraries(doughnut PRIVATE
     OpenGL::GL
     glfw
     glm::glm
+    glad::glad
 )
 
 # Include directories
@@ -34,3 +36,4 @@ target_include_directories(doughnut PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Header_F
 message(STATUS "OpenGL found: ${OPENGL_FOUND}")
 message(STATUS "GLFW3 found: ${glfw3_FOUND}")
 message(STATUS "GLM found: ${glm_FOUND}")
+message(STATUS "GLAD found: ${glad_FOUND}")

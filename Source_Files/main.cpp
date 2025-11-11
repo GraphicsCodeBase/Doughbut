@@ -1,4 +1,5 @@
 #include <iostream>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -27,6 +28,14 @@ int main()
 
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
+
+	// Load OpenGL function pointers using GLAD
+	if (!gladLoadGL()) {
+		std::cerr << "Failed to initialize GLAD" << std::endl;
+		glfwDestroyWindow(window);
+		glfwTerminate();
+		return -1;
+	}
 
 	// Enable vsync
 	glfwSwapInterval(1);
