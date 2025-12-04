@@ -19,7 +19,7 @@ find_package(glad REQUIRED)
 # Define the executable
 add_executable(doughnut
     Source_Files/main.cpp
- "Source_Files/Mesh.cpp" "Source_Files/Shader.cpp")
+ "Source_Files/Mesh.cpp" "Source_Files/Shader.cpp" "Source_Files/Camera.cpp")
 
 # Link libraries to the executable
 target_link_libraries(doughnut PRIVATE

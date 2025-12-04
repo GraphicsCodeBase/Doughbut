@@ -20,6 +20,9 @@ class Mesh
 		// Set mesh data (vertices and indices)
 		void setMeshData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 
+		// Generate a procedural torus (doughnut) mesh
+		void generateTorus(float majorRadius, float minorRadius, unsigned int majorSegments, unsigned int minorSegments);
+
 		// Render the mesh
 		void render();
 

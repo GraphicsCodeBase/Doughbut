@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <Mesh.hpp>
 #include <Shader.hpp>
+#include <Camera.hpp>
 
 int main()
 {
@@ -50,43 +51,95 @@ int main()
 	// Load shaders from files
 	Shader shader = Shader::FromSource("../../../Shaders/main.vert", "../../../Shaders/main.frag");
 
-	// Create a simple triangle for testing
-	std::vector<Vertex> triangleVertices = {
-		// Position					Normal
-		{{ 0.0f,  0.5f,  0.0f },	{ 0.0f,  0.0f,  1.0f }},	// Top
-		{{-0.5f, -0.5f,  0.0f },	{ 0.0f,  0.0f,  1.0f }},	// Bottom-left
-		{{ 0.5f, -0.5f,  0.0f },	{ 0.0f,  0.0f,  1.0f }}		// Bottom-right
-	};
+	Mesh doughnut;
+	doughnut.generateTorus(
+		1.0f,   // majorRadius - size of the hole
+		0.4f,   // minorRadius - thickness of the tube
+		50,     // majorSegments - smoothness around the ring
+		30      // minorSegments - smoothness around the tube
+	);
 
-	std::vector<unsigned int> triangleIndices = {
-		0, 1, 2	// Triangle
-	};
+	// Camera setup
+	Camera cam(glm::vec3(0.0f, 0.0f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	glm::vec3 camera_position = glm::vec3(0.0f, 0.0f, 4.0f);
+	glm::vec3 camera_dir = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec2 cursor_pos = glm::vec2(0.0f);
+	glm::vec2 window_size = glm::vec2(800.0f, 600.0f);
 
-	Mesh triangle;
-	triangle.setMeshData(triangleVertices, triangleIndices);
+	// Delta time
+	float lastFrame = 0.0f;
+	float dt = 0.0f;
 
 	// Main rendering loop
 	while (!glfwWindowShouldClose(window)) {
+		// Calculate delta time
+		float currentFrame = (float)glfwGetTime();
+		dt = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
 		// Clear the screen
 		glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Camera controls
+		{
+			// Cursor
+			double cursor_x = 0.0;
+			double cursor_y = 0.0;
+			glfwGetCursorPos(window, &cursor_x, &cursor_y);
+
+			if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
+				float speed = 4.0f;
+				auto side = glm::normalize(glm::cross(camera_dir, glm::vec3(0, 1, 0)));
+				auto up = glm::normalize(glm::cross(camera_dir, side));
+
+				if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)) {
+					speed *= 2.0f;
+				}
+
+				// Move
+				if (glfwGetKey(window, GLFW_KEY_W)) {
+					camera_position += glm::normalize(camera_dir) * dt * speed;
+				}
+				if (glfwGetKey(window, GLFW_KEY_S)) {
+					camera_position -= glm::normalize(camera_dir) * dt * speed;
+				}
+				if (glfwGetKey(window, GLFW_KEY_A)) {
+					camera_position -= glm::normalize(side) * dt * speed;
+				}
+				if (glfwGetKey(window, GLFW_KEY_D)) {
+					camera_position += glm::normalize(side) * dt * speed;
+				}
+				if (glfwGetKey(window, GLFW_KEY_SPACE)) {
+					camera_position -= up * dt * speed;
+				}
+				if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) {
+					camera_position += up * dt * speed;
+				}
+
+				// View rotation
+				glm::vec2 cursor_delta = glm::vec2((float)cursor_x - cursor_pos.x, (float)cursor_y - cursor_pos.y);
+				camera_dir = glm::vec3(glm::vec4(camera_dir, 0) * glm::rotate(glm::mat4(1.0f), glm::radians(15.0f) * dt * cursor_delta.y, side));
+				camera_dir = glm::vec3(glm::vec4(camera_dir, 0) * glm::rotate(glm::mat4(1.0f), glm::radians(15.0f) * dt * cursor_delta.x, glm::vec3(0, 1, 0)));
+			}
+			cursor_pos = glm::vec2((float)cursor_x, (float)cursor_y);
+
+			// Update camera
+			float near = 0.01f;
+			float far = 1000.0f;
+			cam.SetProjection(70.0f, window_size, near, far);
+			cam.SetPosition(camera_position);
+			cam.SetTarget(camera_position + camera_dir);
+			cam.Update();
+		}
 
 		// Use shader program
 		shader.Use();
 
 		// Create matrices
 		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view = glm::lookAt(
-			glm::vec3(0.0f, 0.0f, 2.0f),	// Camera position
-			glm::vec3(0.0f, 0.0f, 0.0f),	// Look at
-			glm::vec3(0.0f, 1.0f, 0.0f)		// Up vector
-		);
-		glm::mat4 projection = glm::perspective(
-			glm::radians(45.0f),
-			800.0f / 600.0f,
-			0.1f,
-			100.0f
-		);
+		glm::mat4 view = cam.GetViewMatrix();
+		glm::mat4 projection = cam.GetProjectionMatrix();
 
 		// Normal matrix (transpose of inverse of model matrix)
 		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
@@ -98,12 +151,12 @@ int main()
 		shader.SetMatrix3("normalMatrix", normalMatrix);
 		shader.SetVector3("objectColor", glm::vec3(0.3f, 0.6f, 1.0f));		// Light blue
 		shader.SetVector3("lightPos", glm::vec3(2.0f, 2.0f, 2.0f));
-		shader.SetVector3("viewPos", glm::vec3(0.0f, 0.0f, 2.0f));
+		shader.SetVector3("viewPos", cam.GetPosition());
 
-		// Render triangle
-		triangle.render();
+		// Render doughnut
+		doughnut.render();
 
-		shader.UnUse();
+		shader.UnUse();//unbind shader.
 
 		// Swap front and back buffers
 		glfwSwapBuffers(window);
