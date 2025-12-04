@@ -24,6 +24,7 @@ void Mesh::setMeshData(const std::vector<Vertex>& vertices, const std::vector<un
 	this->indices = indices;
 	this->setupMesh();
 }
+
 //What's happening:
 //- Outer loop(i) : Steps around the main ring(0° to 360°)
 //- Inner loop(j) : Steps around the tube(0° to 360°)

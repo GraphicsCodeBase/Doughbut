@@ -70,6 +70,14 @@ int main()
 	float lastFrame = 0.0f;
 	float dt = 0.0f;
 
+	// Rotation
+	float rotationAngleX = 0.0f;
+	float rotationAngleY = 0.0f;
+	float rotationAngleZ = 0.0f;
+	float rotationSpeedX = 50.0f;  // Degrees per second around X-axis
+	float rotationSpeedY = 30.0f;  // Degrees per second around Y-axis
+	float rotationSpeedZ = 70.0f;  // Degrees per second around Z-axis
+
 	// Main rendering loop
 	while (!glfwWindowShouldClose(window)) {
 		// Calculate delta time
@@ -133,11 +141,24 @@ int main()
 			cam.Update();
 		}
 
+		// Update rotations
+		rotationAngleX += rotationSpeedX * dt;
+		rotationAngleY += rotationSpeedY * dt;
+		rotationAngleZ += rotationSpeedZ * dt;
+
+		// Keep angles in range [0, 360)
+		if (rotationAngleX >= 360.0f) rotationAngleX -= 360.0f;
+		if (rotationAngleY >= 360.0f) rotationAngleY -= 360.0f;
+		if (rotationAngleZ >= 360.0f) rotationAngleZ -= 360.0f;
+
 		// Use shader program
 		shader.Use();
 
-		// Create matrices
+		// Create matrices with multiple rotations (all three axes)
 		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(rotationAngleX), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotate around X-axis (pitch)
+		model = glm::rotate(model, glm::radians(rotationAngleY), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around Y-axis (yaw)
+		model = glm::rotate(model, glm::radians(rotationAngleZ), glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate around Z-axis (roll)
 		glm::mat4 view = cam.GetViewMatrix();
 		glm::mat4 projection = cam.GetProjectionMatrix();
 
