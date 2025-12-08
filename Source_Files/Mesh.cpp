@@ -26,8 +26,8 @@ void Mesh::setMeshData(const std::vector<Vertex>& vertices, const std::vector<un
 }
 
 //What's happening:
-//- Outer loop(i) : Steps around the main ring(0° to 360°)
-//- Inner loop(j) : Steps around the tube(0° to 360°)
+//- Outer loop(i) : Steps around the main ring(0 to 360)
+//- Inner loop(j) : Steps around the tube(0 to 360)
 //- For each(i, j) pair, we calculate :
 //-theta and phi angles in radians
 //- Position using the parametric equations
